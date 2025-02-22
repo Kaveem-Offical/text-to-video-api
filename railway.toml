@@ -1,5 +1,0 @@
-[build]
-nixpacksPkgs = ["ffmpeg"]
-
-[start]
-cmd = "apt-get update && apt-get install -y ffmpeg && python3 server.py"
