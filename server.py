@@ -26,22 +26,15 @@ def generate_video():
     title = data.get("title", "Default Title")
     description = data.get("description", "Default Description")
     video_id = data.get("id", "00000")
-    image_url = data.get("image")
 
-    if not image_url:
-        return jsonify({"error": "Image URL is required"}), 400
-
-    # 🖼️ Download Image
-    image_path = f"{VIDEO_FOLDER}/{video_id}.jpg"
-    subprocess.run(["wget", "-O", image_path, image_url], check=True)
-
-    # 🎬 Generate Video with FFmpeg
     video_path = f"{VIDEO_FOLDER}/{video_id}.mp4"
+
+    # 🎬 Generate Video with FFmpeg (No Image)
     ffmpeg_command = [
         "ffmpeg",
-        "-loop", "1", "-i", image_path,  # Use image as background
+        "-f", "lavfi", "-i", "color=c=black:s=1280x720:d=90",  # Black background, 90 sec
         "-vf", f"drawtext=text='{title}':fontcolor=white:fontsize=40:x=10:y=50",
-        "-t", "90", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p",
         video_path
     ]
 
