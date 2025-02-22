@@ -38,16 +38,28 @@ def generate_video():
         video_path
     ]
 
-    subprocess.run(ffmpeg_command, check=True)
+    try:
+        result = subprocess.run(ffmpeg_command, stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        print("FFmpeg Output:", result.stdout)
+        print("FFmpeg Error:", result.stderr)
 
-    # 🗑️ Auto-delete video after 1 hour
-    threading.Thread(target=delete_video_after_1_hour, args=(video_path,)).start()
+        if result.returncode != 0:
+            return jsonify({"error": "FFmpeg failed", "details": result.stderr}), 500
 
-    return jsonify({"video_url": f"/download/{video_id}.mp4"}), 200
+        # 🗑️ Auto-delete video after 1 hour
+        threading.Thread(target=delete_video_after_1_hour, args=(video_path,)).start()
+
+        return jsonify({"video_url": f"/download/{video_id}.mp4"}), 200
+
+    except Exception as e:
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 @app.route("/download/<filename>")
 def download_video(filename):
-    return send_file(f"{VIDEO_FOLDER}/{filename}", as_attachment=True)
+    file_path = os.path.join(VIDEO_FOLDER, filename)
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    return jsonify({"error": "File not found"}), 404
 
 if __name__ == "__main__":
     from waitress import serve
