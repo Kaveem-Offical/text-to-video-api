@@ -10,7 +10,7 @@ VIDEO_FOLDER = "videos"
 if not os.path.exists(VIDEO_FOLDER):
     os.makedirs(VIDEO_FOLDER)
 
-# 🛠 Function to Delete Video After 1 Hour
+# 🛠 Function to Delete Video After 1 Hours
 def delete_video_after_1_hour(video_path):
     time.sleep(3600)  # 1 hour = 3600 seconds
     if os.path.exists(video_path):
